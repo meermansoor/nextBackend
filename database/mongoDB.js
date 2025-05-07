@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
-import { DB_URI } from "../config/env.js";
+import dotenv from "dotenv";
 import process from "process";
 
-if(!DB_URI){
+dotenv.config();
+
+if(!process.env.DB_URI){
     throw new Error("DB_URI is not defined");
 }
 
 const connectDB = async () => {
     try{
-        await mongoose.connect(DB_URI);
+        await mongoose.connect(process.env.DB_URI);
         console.log(`connected to MongoDB`);
 
         }
