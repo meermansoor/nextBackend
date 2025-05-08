@@ -2,6 +2,7 @@ import express from 'express';
 import indexRouter from './routes/index.js';
 import dotenv from 'dotenv';
 import connectDB from './database/mongoDB.js';
+import authRouter from './routes/auth.routes.js';
 
 
 dotenv.config();
@@ -16,11 +17,12 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/', indexRouter);
+app.use('/api/auth', authRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).json({ message: 'Something went wrong!' });
 });
 
 // Start server
