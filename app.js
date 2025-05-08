@@ -3,7 +3,7 @@ import indexRouter from './routes/index.js';
 import dotenv from 'dotenv';
 import connectDB from './database/mongoDB.js';
 import authRouter from './routes/auth.routes.js';
-
+import projectRouter from './routes/project.routes.js';
 
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: false }));
 // Routes
 app.use('/', indexRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/projects', projectRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
