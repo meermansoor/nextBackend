@@ -4,24 +4,14 @@ import User from '../models/user.model.js';
 export const register = async (req, res) => {
     try {
         console.log('Registration request body:', req.body);
-        const { username, email, password, confirmPassword } = req.body;
+        const { username, email, password } = req.body;
 
         // Validate required fields
-        if (!username || !email || !password || !confirmPassword) {
-            console.log('Missing fields:', { username, email, password: !!password, confirmPassword: !!confirmPassword });
+        if (!username || !email || !password) {
+            console.log('Missing fields:', { username, email, password: !!password });
             return res.status(400).json({ 
                 message: "All fields are required",
-                received: { username, email, password: !!password, confirmPassword: !!confirmPassword }
-            });
-        }
-
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            console.log('Password mismatch:', { passwordLength: password?.length, confirmPasswordLength: confirmPassword?.length });
-            return res.status(400).json({ 
-                message: "Password and confirm password do not match",
-                passwordLength: password?.length,
-                confirmPasswordLength: confirmPassword?.length
+                received: { username, email, password: !!password }
             });
         }
 
@@ -143,4 +133,40 @@ export const  forgotPassword = async (req,res,next) =>{
         next(error);
     }
 
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (newPassword !== confirmNewPassword) {
+      const error = new Error("New password and confirm password do not match");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      const error = new Error("Invalid old password");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = newHashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    next(error);
+  }
 };
